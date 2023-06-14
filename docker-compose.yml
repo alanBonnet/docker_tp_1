@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  mi-mariadb:
+    image: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysecretpassword
+      - MYSQL_DATABASE=tienda
+
+  tienda_back_end:
+    image: tienda_back_end
+    ports:
+      - 3000:3000
+    depends_on:
+      - mi-mariadb
+    command: bash -c "until nc -z mi-mariadb 3306; do sleep 1; done && npm start"
+    environment:
+      - DB_HOST=mi-mariadb
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=mysecretpassword
+      - DB_NAME=tienda
+
+  tienda_front_end:
+    image: tienda_front_end
+    ports:
+      - 3001:3001
+    depends_on: 
+      - tienda_back_end
